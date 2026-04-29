@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
     }
 
     // Atualizar status da campanha
-    await supabase.from("campanhas").update({ status: "enviada" }).eq("id", campanha_id);
+    await supabase.from("campanhas").update({ status: "enviado" }).eq("id", campanha_id);
 
     // Atualizar status dos leads "novo" -> "em_contato"
     const leadIds = recipients.map((l) => l.id);
