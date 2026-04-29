@@ -123,28 +123,6 @@ export default function Dashboard() {
 
       <ImpactWizard open={wizardOpen} onOpenChange={setWizardOpen} />
 
-      {/* MENU VISUAL */}
-      <section>
-        <h2 className="text-lg font-semibold mb-4">O que você pode fazer aqui</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {menuItems.map((item, i) => (
-            <button
-              key={i}
-              onClick={() => navigate(item.to)}
-              className="text-left p-4 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-card/80 transition-all space-y-2"
-            >
-              <div className="rounded-lg bg-primary/10 p-2 w-fit text-primary">
-                <item.icon className="h-5 w-5" />
-              </div>
-              <p className="font-semibold text-sm leading-snug">{item.title}</p>
-              <p className="text-xs text-muted-foreground leading-snug line-clamp-3">
-                {item.desc}
-              </p>
-            </button>
-          ))}
-        </div>
-      </section>
-
       {/* KPIs */}
       <section>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
