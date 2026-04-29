@@ -1,21 +1,56 @@
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Kanban, Mail, Settings, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  Kanban,
+  Mail,
+  Settings,
+  LogOut,
+  MessageSquare,
+  FileText,
+  MoreHorizontal,
+} from "lucide-react";
 import { B2BLogo } from "./B2BLogo";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/leads", label: "Leads", icon: Users },
   { to: "/kanban", label: "Kanban", icon: Kanban },
-  { to: "/emails", label: "E-mails", icon: Mail },
-  { to: "/configuracoes", label: "Configurações", icon: Settings, desktopOnly: true },
+  { to: "/emails", label: "Campanhas", icon: Mail },
+  { to: "/respostas", label: "Respostas", icon: MessageSquare, badge: "respostas" as const },
+  { to: "/templates", label: "Templates", icon: FileText },
+  { to: "/configuracoes", label: "Configurações", icon: Settings },
 ];
+
+const mobilePrimary = navItems.slice(0, 5);
+const mobileMore = navItems.slice(5);
 
 export default function AppLayout() {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const [unread, setUnread] = useState(0);
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("respostas")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "nova")
+      .then(({ count }) => setUnread(count ?? 0));
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -45,7 +80,12 @@ export default function AppLayout() {
               }
             >
               <item.icon className="h-4 w-4" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.badge === "respostas" && unread > 0 && (
+                <span className="rounded-full bg-status-respondeu px-1.5 py-0.5 text-[10px] font-bold text-background">
+                  {unread}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -73,23 +113,54 @@ export default function AppLayout() {
 
         {/* Mobile bottom nav */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur">
-          <div className="grid grid-cols-4">
-            {navItems.filter((i) => !i.desktopOnly).map((item) => (
+          <div className="grid grid-cols-6">
+            {mobilePrimary.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
                   cn(
-                    "flex flex-col items-center justify-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
+                    "relative flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
                     isActive ? "text-primary" : "text-muted-foreground",
                   )
                 }
               >
                 <item.icon className="h-5 w-5" />
-                {item.label}
+                <span className="truncate max-w-full px-1">{item.label}</span>
+                {item.badge === "respostas" && unread > 0 && (
+                  <span className="absolute top-1 right-3 rounded-full bg-status-respondeu px-1 text-[9px] font-bold text-background">
+                    {unread}
+                  </span>
+                )}
               </NavLink>
             ))}
+            <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+              <SheetTrigger asChild>
+                <button className="flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium text-muted-foreground">
+                  <MoreHorizontal className="h-5 w-5" />
+                  <span>Mais</span>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="rounded-t-2xl">
+                <SheetHeader>
+                  <SheetTitle>Mais</SheetTitle>
+                </SheetHeader>
+                <div className="grid gap-2 mt-4">
+                  {mobileMore.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setMoreOpen(false)}
+                      className="flex items-center gap-3 rounded-lg px-3 py-3 hover:bg-secondary"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </nav>
       </div>
