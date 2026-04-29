@@ -15,6 +15,7 @@ import { Search, Download, Linkedin, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { ApolloPaidWarning } from "./ApolloPaidWarning";
 
 interface ApolloPerson {
   id: string;
@@ -143,6 +144,8 @@ export function ApolloSearch({ onImported }: { onImported: () => void }) {
           Configure sua chave em Configurações antes de buscar.
         </p>
       </div>
+
+      <ApolloPaidWarning />
 
       <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="space-y-1.5">

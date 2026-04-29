@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { ApolloPaidWarning } from "@/components/ApolloPaidWarning";
 
 export default function Configuracoes() {
   const { user } = useAuth();
@@ -97,6 +98,9 @@ export default function Configuracoes() {
         <p className="text-sm text-muted-foreground mb-4">
           Use a API do Apollo para buscar e importar leads.
         </p>
+        <div className="mb-4">
+          <ApolloPaidWarning />
+        </div>
         <form onSubmit={handleSave} className="space-y-3">
           <div className="space-y-1.5">
             <Label>Chave de API Apollo.io</Label>
