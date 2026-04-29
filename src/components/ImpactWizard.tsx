@@ -30,6 +30,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { LeadStatus, STATUS_OPTIONS } from "./StatusBadge";
+import { ApolloPaidWarning } from "./ApolloPaidWarning";
 
 interface BaseLead {
   id: string;
@@ -377,6 +378,7 @@ export function ImpactWizard({ open, onOpenChange }: Props) {
               </TabsList>
 
               <TabsContent value="apollo" className="space-y-3 mt-4">
+                <ApolloPaidWarning />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label>Cargo alvo</Label>

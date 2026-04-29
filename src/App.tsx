@@ -12,6 +12,8 @@ import Leads from "./pages/Leads";
 import Kanban from "./pages/Kanban";
 import Emails from "./pages/Emails";
 import Configuracoes from "./pages/Configuracoes";
+import Templates from "./pages/Templates";
+import Respostas from "./pages/Respostas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
               <Route path="/leads" element={<Leads />} />
               <Route path="/kanban" element={<Kanban />} />
               <Route path="/emails" element={<Emails />} />
+              <Route path="/respostas" element={<Respostas />} />
+              <Route path="/templates" element={<Templates />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
             </Route>
             <Route path="*" element={<NotFound />} />

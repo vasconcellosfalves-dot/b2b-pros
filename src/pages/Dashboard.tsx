@@ -1,121 +1,248 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Users, Mail, MessageCircle, Activity, Rocket } from "lucide-react";
+import {
+  Rocket,
+  UserPlus,
+  MailPlus,
+  MessageCircle,
+  Columns3,
+  Clock,
+  FileText,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { StatusBadge, LeadStatus } from "@/components/StatusBadge";
 import { ImpactWizard } from "@/components/ImpactWizard";
 
-interface Lead {
-  id: string;
-  nome: string;
-  empresa: string | null;
-  status: LeadStatus;
-  criado_em: string;
+interface Kpis {
+  totalLeads: number;
+  campanhasAtivas: number;
+  enviadosMes: number;
+  responderam: number;
+  importados: number;
+  contatados: number;
+  reuniao: number;
+  convertidos: number;
 }
+
+const menuItems = [
+  {
+    to: "/leads",
+    icon: UserPlus,
+    title: "Encontre seus clientes ideais",
+    desc: "Importe leads do Apollo.io em segundos ou adicione manualmente. Sua base de contatos organizada e pronta para prospecção.",
+  },
+  {
+    to: "/emails",
+    icon: MailPlus,
+    title: "Dispare e-mails que convertem",
+    desc: "Crie sequências automáticas com IA, agende os envios e acompanhe quem abriu, clicou e respondeu.",
+  },
+  {
+    to: "/respostas",
+    icon: MessageCircle,
+    title: "Nunca perca uma oportunidade",
+    desc: "Todas as respostas em um só lugar. A IA classifica a intenção e sugere o reply perfeito para você aprovar e enviar.",
+  },
+  {
+    to: "/kanban",
+    icon: Columns3,
+    title: "Gerencie seu pipeline visual",
+    desc: "Arraste seus leads pelo funil: do primeiro contato até o fechamento. Visão clara de onde está cada oportunidade.",
+  },
+  {
+    to: "/leads",
+    icon: Clock,
+    title: "Tudo registrado, nada esquecido",
+    desc: "Veja o histórico completo de cada lead: e-mails, respostas, notas e reuniões agendadas. Contexto sempre na mão.",
+  },
+  {
+    to: "/templates",
+    icon: FileText,
+    title: "Seus melhores e-mails sempre prontos",
+    desc: "Salve os e-mails que mais convertem e reutilize em qualquer campanha. Com IA para gerar novos em segundos.",
+  },
+];
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ total: 0, respondeu: 0, enviadosHoje: 0 });
-  const [activities, setActivities] = useState<Lead[]>([]);
+  const navigate = useNavigate();
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [kpis, setKpis] = useState<Kpis>({
+    totalLeads: 0,
+    campanhasAtivas: 0,
+    enviadosMes: 0,
+    responderam: 0,
+    importados: 0,
+    contatados: 0,
+    reuniao: 0,
+    convertidos: 0,
+  });
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const { data: leads } = await supabase
-        .from("leads")
-        .select("id, nome, empresa, status, criado_em")
-        .order("criado_em", { ascending: false });
+      const startMonth = new Date();
+      startMonth.setDate(1);
+      startMonth.setHours(0, 0, 0, 0);
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const [
+        { data: leads },
+        { count: campanhasAtivas },
+        { count: enviadosMes },
+      ] = await Promise.all([
+        supabase.from("leads").select("id, status"),
+        supabase
+          .from("campanhas")
+          .select("*", { count: "exact", head: true })
+          .in("status", ["enviando", "agendada"]),
+        supabase
+          .from("campanha_leads")
+          .select("*", { count: "exact", head: true })
+          .gte("enviado_em", startMonth.toISOString()),
+      ]);
 
-      const { count: enviadosHoje } = await supabase
-        .from("campanha_leads")
-        .select("*", { count: "exact", head: true })
-        .gte("enviado_em", today.toISOString());
+      const all = leads ?? [];
+      const by = (s: string) => all.filter((l: any) => l.status === s).length;
 
-      const all = (leads ?? []) as Lead[];
-      setStats({
-        total: all.length,
-        respondeu: all.filter((l) => l.status === "respondeu").length,
-        enviadosHoje: enviadosHoje ?? 0,
+      setKpis({
+        totalLeads: all.length,
+        campanhasAtivas: campanhasAtivas ?? 0,
+        enviadosMes: enviadosMes ?? 0,
+        responderam: by("respondeu"),
+        importados: all.length,
+        contatados: by("em_contato"),
+        reuniao: by("respondeu"),
+        convertidos: by("convertido"),
       });
-      setActivities(all.slice(0, 5));
     };
     load();
   }, [user]);
 
-  const cards = [
-    { label: "Leads cadastrados", value: stats.total, icon: Users, color: "text-status-novo" },
-    { label: "E-mails enviados hoje", value: stats.enviadosHoje, icon: Mail, color: "text-status-em-contato" },
-    { label: "Leads que responderam", value: stats.respondeu, icon: MessageCircle, color: "text-status-respondeu" },
+  const funnel = [
+    { label: "Importados", value: kpis.importados, color: "bg-status-novo" },
+    { label: "Contatados", value: kpis.contatados, color: "bg-status-em-contato" },
+    { label: "Responderam", value: kpis.responderam, color: "bg-status-respondeu" },
+    { label: "Reunião", value: kpis.reuniao, color: "bg-primary-glow" },
+    { label: "Convertidos", value: kpis.convertidos, color: "bg-status-convertido" },
+  ];
+  const funnelMax = Math.max(...funnel.map((f) => f.value), 1);
+
+  const kpiCards = [
+    { label: "Total de leads", value: kpis.totalLeads },
+    { label: "Campanhas ativas", value: kpis.campanhasAtivas },
+    { label: "Enviados este mês", value: kpis.enviadosMes },
+    { label: "Responderam", value: kpis.responderam },
   ];
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground text-sm">Resumo da sua prospecção</p>
-      </div>
-
-      <button
-        onClick={() => setWizardOpen(true)}
-        className="w-full rounded-2xl px-6 py-7 md:py-8 text-white shadow-[var(--shadow-elegant)] hover:shadow-[0_18px_45px_-10px_hsl(217_92%_64%/0.55)] transition-all hover:-translate-y-0.5 active:translate-y-0 flex flex-col md:flex-row items-center justify-center gap-3 md:gap-5"
-        style={{ background: "linear-gradient(135deg, #4F8EF7 0%, #3B7BE0 100%)" }}
-      >
-        <div className="rounded-full bg-white/20 p-3">
-          <Rocket className="h-7 w-7" />
+    <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+      {/* HERO */}
+      <section className="text-center space-y-4 pt-2 md:pt-6">
+        <h1 className="text-2xl md:text-4xl font-bold leading-tight">
+          Pronto para fechar novos negócios?
+        </h1>
+        <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
+          Encontre, impacte e converta seus próximos clientes em minutos.
+        </p>
+        <div className="space-y-2 max-w-md mx-auto">
+          <button
+            onClick={() => setWizardOpen(true)}
+            className="w-full rounded-2xl px-6 py-6 md:py-7 text-white shadow-[var(--shadow-elegant)] hover:shadow-[0_18px_45px_-10px_hsl(217_92%_64%/0.55)] transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-3"
+            style={{ background: "linear-gradient(135deg, #4F8EF7 0%, #3B7BE0 100%)" }}
+          >
+            <Rocket className="h-6 w-6" />
+            <span className="text-xl md:text-2xl font-bold">Impactar agora</span>
+          </button>
+          <p className="text-xs text-muted-foreground">
+            Selecione um público, crie seu e-mail e dispare — tudo em um fluxo
+          </p>
         </div>
-        <div className="text-center md:text-left">
-          <p className="text-xl md:text-2xl font-bold leading-tight">Impactar agora</p>
-          <p className="text-sm text-white/85">Selecione um público e dispare uma campanha</p>
-        </div>
-      </button>
+      </section>
 
       <ImpactWizard open={wizardOpen} onOpenChange={setWizardOpen} />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {cards.map((c) => (
-          <Card key={c.label} className="p-5 bg-card border-border">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{c.label}</p>
-                <p className="text-3xl font-bold mt-2">{c.value}</p>
+      {/* MENU VISUAL */}
+      <section>
+        <h2 className="text-lg font-semibold mb-4">O que você pode fazer aqui</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          {menuItems.map((item, i) => (
+            <button
+              key={i}
+              onClick={() => navigate(item.to)}
+              className="text-left p-4 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-card/80 transition-all space-y-2"
+            >
+              <div className="rounded-lg bg-primary/10 p-2 w-fit text-primary">
+                <item.icon className="h-5 w-5" />
               </div>
-              <div className={`rounded-lg bg-secondary p-2.5 ${c.color}`}>
-                <c.icon className="h-5 w-5" />
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <Card className="p-5 bg-card border-border">
-        <div className="flex items-center gap-2 mb-4">
-          <Activity className="h-4 w-4 text-primary" />
-          <h2 className="font-semibold">Últimas atividades</h2>
+              <p className="font-semibold text-sm leading-snug">{item.title}</p>
+              <p className="text-xs text-muted-foreground leading-snug line-clamp-3">
+                {item.desc}
+              </p>
+            </button>
+          ))}
         </div>
-        {activities.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">
-            Nenhum lead cadastrado ainda. Comece adicionando seu primeiro lead.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {activities.map((a) => (
-              <div key={a.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-sm truncate">{a.nome}</p>
-                  <p className="text-xs text-muted-foreground truncate">{a.empresa ?? "—"}</p>
+      </section>
+
+      {/* KPIs */}
+      <section>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          {kpiCards.map((c) => (
+            <Card key={c.label} className="p-4 bg-card border-border">
+              <p className="text-xs text-muted-foreground">{c.label}</p>
+              <p className="text-2xl md:text-3xl font-bold mt-1">{c.value}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* FUNIL */}
+      <section>
+        <h2 className="text-lg font-semibold mb-4">Funil de conversão</h2>
+        <Card className="p-4 md:p-6 bg-card border-border">
+          <div className="space-y-3 md:hidden">
+            {funnel.map((f, i) => {
+              const prev = i === 0 ? f.value : funnel[i - 1].value;
+              const pct = prev > 0 && i > 0 ? Math.round((f.value / prev) * 100) : null;
+              return (
+                <div key={f.label} className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-medium">{f.label}</span>
+                    <span className="text-muted-foreground">
+                      {f.value}{pct !== null ? ` · ${pct}%` : ""}
+                    </span>
+                  </div>
+                  <div className="h-3 rounded-full bg-secondary overflow-hidden">
+                    <div className={`h-full ${f.color} transition-all`} style={{ width: `${(f.value / funnelMax) * 100}%` }} />
+                  </div>
                 </div>
-                <StatusBadge status={a.status} />
-              </div>
-            ))}
+              );
+            })}
           </div>
-        )}
-      </Card>
+          <div className="hidden md:flex items-end justify-between gap-2">
+            {funnel.map((f, i) => {
+              const prev = i === 0 ? f.value : funnel[i - 1].value;
+              const pct = prev > 0 && i > 0 ? Math.round((f.value / prev) * 100) : null;
+              const heightPct = (f.value / funnelMax) * 100;
+              return (
+                <div key={f.label} className="flex-1 flex flex-col items-center gap-2">
+                  <p className="text-2xl font-bold">{f.value}</p>
+                  <div className="w-full h-32 flex items-end">
+                    <div
+                      className={`w-full ${f.color} rounded-t-lg transition-all`}
+                      style={{ height: `${Math.max(heightPct, 8)}%` }}
+                    />
+                  </div>
+                  <p className="text-xs font-medium text-center">{f.label}</p>
+                  {pct !== null && (
+                    <p className="text-[10px] text-muted-foreground">{pct}% da etapa anterior</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      </section>
     </div>
   );
 }
