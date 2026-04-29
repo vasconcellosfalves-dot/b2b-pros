@@ -1,4 +1,5 @@
 import { Briefcase } from "lucide-react";
+import lineaLogo from "@/assets/linea-logo.png";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -8,6 +9,7 @@ interface LogoProps {
 export function B2BLogo({ size = "md", showTagline = false }: LogoProps) {
   const dims = size === "sm" ? "h-8 w-8" : size === "lg" ? "h-14 w-14" : "h-10 w-10";
   const text = size === "sm" ? "text-base" : size === "lg" ? "text-3xl" : "text-xl";
+  const lineaH = size === "sm" ? "h-4" : size === "lg" ? "h-6" : "h-5";
   return (
     <div className="flex items-center gap-3">
       <div
@@ -20,9 +22,12 @@ export function B2BLogo({ size = "md", showTagline = false }: LogoProps) {
           B2B <span className="text-primary">PROS</span>
         </span>
         {showTagline && (
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-            um produto Linea Consulting
-          </span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              um produto
+            </span>
+            <img src={lineaLogo} alt="Linea Consulting" className={`${lineaH} w-auto opacity-90`} />
+          </div>
         )}
       </div>
     </div>
