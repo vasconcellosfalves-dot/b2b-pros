@@ -1,15 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import {
-  Rocket,
-  UserPlus,
-  MailPlus,
-  MessageCircle,
-  Columns3,
-  Clock,
-  FileText,
-} from "lucide-react";
+import { Rocket, Users, Mail, MessageCircle, Columns3, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ImpactWizard } from "@/components/ImpactWizard";
@@ -25,43 +17,12 @@ interface Kpis {
   convertidos: number;
 }
 
-const menuItems = [
-  {
-    to: "/leads",
-    icon: UserPlus,
-    title: "Encontre seus clientes ideais",
-    desc: "Importe leads do Apollo.io em segundos ou adicione manualmente. Sua base de contatos organizada e pronta para prospecção.",
-  },
-  {
-    to: "/emails",
-    icon: MailPlus,
-    title: "Dispare e-mails que convertem",
-    desc: "Crie sequências automáticas com IA, agende os envios e acompanhe quem abriu, clicou e respondeu.",
-  },
-  {
-    to: "/respostas",
-    icon: MessageCircle,
-    title: "Nunca perca uma oportunidade",
-    desc: "Todas as respostas em um só lugar. A IA classifica a intenção e sugere o reply perfeito para você aprovar e enviar.",
-  },
-  {
-    to: "/kanban",
-    icon: Columns3,
-    title: "Gerencie seu pipeline visual",
-    desc: "Arraste seus leads pelo funil: do primeiro contato até o fechamento. Visão clara de onde está cada oportunidade.",
-  },
-  {
-    to: "/leads",
-    icon: Clock,
-    title: "Tudo registrado, nada esquecido",
-    desc: "Veja o histórico completo de cada lead: e-mails, respostas, notas e reuniões agendadas. Contexto sempre na mão.",
-  },
-  {
-    to: "/templates",
-    icon: FileText,
-    title: "Seus melhores e-mails sempre prontos",
-    desc: "Salve os e-mails que mais convertem e reutilize em qualquer campanha. Com IA para gerar novos em segundos.",
-  },
+const quickLinks = [
+  { to: "/leads", icon: Users, label: "Leads" },
+  { to: "/emails", icon: Mail, label: "Campanhas" },
+  { to: "/respostas", icon: MessageCircle, label: "Respostas" },
+  { to: "/kanban", icon: Columns3, label: "Pipeline" },
+  { to: "/templates", icon: FileText, label: "Templates" },
 ];
 
 export default function Dashboard() {
@@ -162,28 +123,6 @@ export default function Dashboard() {
 
       <ImpactWizard open={wizardOpen} onOpenChange={setWizardOpen} />
 
-      {/* MENU VISUAL */}
-      <section>
-        <h2 className="text-lg font-semibold mb-4">O que você pode fazer aqui</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {menuItems.map((item, i) => (
-            <button
-              key={i}
-              onClick={() => navigate(item.to)}
-              className="text-left p-4 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-card/80 transition-all space-y-2"
-            >
-              <div className="rounded-lg bg-primary/10 p-2 w-fit text-primary">
-                <item.icon className="h-5 w-5" />
-              </div>
-              <p className="font-semibold text-sm leading-snug">{item.title}</p>
-              <p className="text-xs text-muted-foreground leading-snug line-clamp-3">
-                {item.desc}
-              </p>
-            </button>
-          ))}
-        </div>
-      </section>
-
       {/* KPIs */}
       <section>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
@@ -242,6 +181,23 @@ export default function Dashboard() {
             })}
           </div>
         </Card>
+      </section>
+
+      {/* QUICK LINKS - secundário */}
+      <section className="pt-2">
+        <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Atalhos</p>
+        <div className="flex flex-wrap gap-2">
+          {quickLinks.map((q) => (
+            <button
+              key={q.label}
+              onClick={() => navigate(q.to)}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border hover:border-primary/50 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <q.icon className="h-3.5 w-3.5" />
+              {q.label}
+            </button>
+          ))}
+        </div>
       </section>
     </div>
   );
