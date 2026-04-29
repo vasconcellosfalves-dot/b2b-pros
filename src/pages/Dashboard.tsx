@@ -182,6 +182,23 @@ export default function Dashboard() {
           </div>
         </Card>
       </section>
+
+      {/* QUICK LINKS - secundário */}
+      <section className="pt-2">
+        <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Atalhos</p>
+        <div className="flex flex-wrap gap-2">
+          {quickLinks.map((q) => (
+            <button
+              key={q.label}
+              onClick={() => navigate(q.to)}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border hover:border-primary/50 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <q.icon className="h-3.5 w-3.5" />
+              {q.label}
+            </button>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
