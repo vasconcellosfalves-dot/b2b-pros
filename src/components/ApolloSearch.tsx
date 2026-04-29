@@ -74,15 +74,7 @@ export function ApolloSearch({ onImported }: { onImported: () => void }) {
         organization_num_employees_ranges: size ? [size] : [],
       };
       const { data, error } = await supabase.functions.invoke("apollo-search", { body });
-      // Em erros HTTP (4xx/5xx), supabase-js coloca o body em error.context — extrair
-      if (error) {
-        let msg = error.message;
-        try {
-          const ctxBody = await (error as any).context?.json?.();
-          if (ctxBody?.error) msg = ctxBody.error;
-        } catch { /* ignore */ }
-        throw new Error(msg);
-      }
+      if (error) throw new Error(error.message);
       if ((data as any)?.error) throw new Error((data as any).error);
       const people: ApolloPerson[] = (data as any)?.people ?? [];
       setResults(people);
