@@ -82,6 +82,7 @@ export type Database = {
       }
       configuracoes: {
         Row: {
+          apollo_key: string | null
           atualizado_em: string
           id: string
           remetente_email: string | null
@@ -90,6 +91,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          apollo_key?: string | null
           atualizado_em?: string
           id?: string
           remetente_email?: string | null
@@ -98,6 +100,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          apollo_key?: string | null
           atualizado_em?: string
           id?: string
           remetente_email?: string | null
