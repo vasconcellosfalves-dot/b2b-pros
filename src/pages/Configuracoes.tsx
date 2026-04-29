@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 export default function Configuracoes() {
   const { user } = useAuth();
-  const [config, setConfig] = useState({ sendgrid_key: "", remetente_nome: "", remetente_email: "" });
+  const [config, setConfig] = useState({ sendgrid_key: "", remetente_nome: "", remetente_email: "", apollo_key: "" });
   const [novaSenha, setNovaSenha] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -25,6 +25,7 @@ export default function Configuracoes() {
           sendgrid_key: data.sendgrid_key ?? "",
           remetente_nome: data.remetente_nome ?? "",
           remetente_email: data.remetente_email ?? "",
+          apollo_key: (data as any).apollo_key ?? "",
         });
       });
   }, [user]);
