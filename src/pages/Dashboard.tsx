@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Users, Mail, MessageCircle, Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, Mail, MessageCircle, Activity, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { StatusBadge, LeadStatus } from "@/components/StatusBadge";
+import { ImpactWizard } from "@/components/ImpactWizard";
 
 interface Lead {
   id: string;
@@ -17,6 +19,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ total: 0, respondeu: 0, enviadosHoje: 0 });
   const [activities, setActivities] = useState<Lead[]>([]);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -57,6 +60,22 @@ export default function Dashboard() {
         <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground text-sm">Resumo da sua prospecção</p>
       </div>
+
+      <button
+        onClick={() => setWizardOpen(true)}
+        className="w-full rounded-2xl px-6 py-7 md:py-8 text-white shadow-[var(--shadow-elegant)] hover:shadow-[0_18px_45px_-10px_hsl(217_92%_64%/0.55)] transition-all hover:-translate-y-0.5 active:translate-y-0 flex flex-col md:flex-row items-center justify-center gap-3 md:gap-5"
+        style={{ background: "linear-gradient(135deg, #4F8EF7 0%, #3B7BE0 100%)" }}
+      >
+        <div className="rounded-full bg-white/20 p-3">
+          <Rocket className="h-7 w-7" />
+        </div>
+        <div className="text-center md:text-left">
+          <p className="text-xl md:text-2xl font-bold leading-tight">Impactar agora</p>
+          <p className="text-sm text-white/85">Selecione um público e dispare uma campanha</p>
+        </div>
+      </button>
+
+      <ImpactWizard open={wizardOpen} onOpenChange={setWizardOpen} />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {cards.map((c) => (
