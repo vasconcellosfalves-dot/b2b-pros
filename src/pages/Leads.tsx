@@ -16,6 +16,7 @@ import { Plus, Search, Download, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { StatusBadge, STATUS_OPTIONS, LeadStatus } from "@/components/StatusBadge";
+import { ApolloSearch } from "@/components/ApolloSearch";
 import { toast } from "sonner";
 
 interface Lead {
@@ -158,6 +159,8 @@ export default function Leads() {
           </Dialog>
         </div>
       </div>
+
+      <ApolloSearch onImported={load} />
 
       <Card className="p-3 md:p-4 bg-card border-border">
         <div className="flex flex-col md:flex-row gap-2">

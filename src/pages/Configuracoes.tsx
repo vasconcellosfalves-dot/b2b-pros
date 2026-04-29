@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 export default function Configuracoes() {
   const { user } = useAuth();
-  const [config, setConfig] = useState({ sendgrid_key: "", remetente_nome: "", remetente_email: "" });
+  const [config, setConfig] = useState({ sendgrid_key: "", remetente_nome: "", remetente_email: "", apollo_key: "" });
   const [novaSenha, setNovaSenha] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -25,6 +25,7 @@ export default function Configuracoes() {
           sendgrid_key: data.sendgrid_key ?? "",
           remetente_nome: data.remetente_nome ?? "",
           remetente_email: data.remetente_email ?? "",
+          apollo_key: (data as any).apollo_key ?? "",
         });
       });
   }, [user]);
@@ -88,6 +89,33 @@ export default function Configuracoes() {
             />
           </div>
           <Button type="submit" disabled={busy}>{busy ? "Salvando..." : "Salvar configurações"}</Button>
+        </form>
+      </Card>
+
+      <Card className="p-5 bg-card border-border">
+        <h2 className="font-semibold mb-1">Integração Apollo.io</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Use a API do Apollo para buscar e importar leads.
+        </p>
+        <form onSubmit={handleSave} className="space-y-3">
+          <div className="space-y-1.5">
+            <Label>Chave de API Apollo.io</Label>
+            <Input
+              type="password"
+              value={config.apollo_key}
+              onChange={(e) => setConfig({ ...config, apollo_key: e.target.value })}
+              placeholder="cole sua API key aqui"
+            />
+            <a
+              href="https://apollo.io/settings/api"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline inline-block"
+            >
+              Como obter minha chave do Apollo? →
+            </a>
+          </div>
+          <Button type="submit" disabled={busy}>{busy ? "Salvando..." : "Salvar"}</Button>
         </form>
       </Card>
 
