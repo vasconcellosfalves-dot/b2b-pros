@@ -177,7 +177,14 @@ export function ImpactWizard({ open, onOpenChange }: Props) {
         organization_num_employees_ranges: apSize ? [apSize] : [],
       };
       const { data, error } = await supabase.functions.invoke("apollo-search", { body });
-      if (error) throw new Error(error.message);
+      if (error) {
+        let msg = error.message;
+        try {
+          const ctxBody = await (error as any).context?.json?.();
+          if (ctxBody?.error) msg = ctxBody.error;
+        } catch { /* ignore */ }
+        throw new Error(msg);
+      }
       if ((data as any)?.error) throw new Error((data as any).error);
       const people = (data as any).people ?? [];
       setApResults(
