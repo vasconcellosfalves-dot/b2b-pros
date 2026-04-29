@@ -1,15 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import {
-  Rocket,
-  UserPlus,
-  MailPlus,
-  MessageCircle,
-  Columns3,
-  Clock,
-  FileText,
-} from "lucide-react";
+import { Rocket, Users, Mail, MessageCircle, Columns3, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ImpactWizard } from "@/components/ImpactWizard";
@@ -25,43 +17,12 @@ interface Kpis {
   convertidos: number;
 }
 
-const menuItems = [
-  {
-    to: "/leads",
-    icon: UserPlus,
-    title: "Encontre seus clientes ideais",
-    desc: "Importe leads do Apollo.io em segundos ou adicione manualmente. Sua base de contatos organizada e pronta para prospecção.",
-  },
-  {
-    to: "/emails",
-    icon: MailPlus,
-    title: "Dispare e-mails que convertem",
-    desc: "Crie sequências automáticas com IA, agende os envios e acompanhe quem abriu, clicou e respondeu.",
-  },
-  {
-    to: "/respostas",
-    icon: MessageCircle,
-    title: "Nunca perca uma oportunidade",
-    desc: "Todas as respostas em um só lugar. A IA classifica a intenção e sugere o reply perfeito para você aprovar e enviar.",
-  },
-  {
-    to: "/kanban",
-    icon: Columns3,
-    title: "Gerencie seu pipeline visual",
-    desc: "Arraste seus leads pelo funil: do primeiro contato até o fechamento. Visão clara de onde está cada oportunidade.",
-  },
-  {
-    to: "/leads",
-    icon: Clock,
-    title: "Tudo registrado, nada esquecido",
-    desc: "Veja o histórico completo de cada lead: e-mails, respostas, notas e reuniões agendadas. Contexto sempre na mão.",
-  },
-  {
-    to: "/templates",
-    icon: FileText,
-    title: "Seus melhores e-mails sempre prontos",
-    desc: "Salve os e-mails que mais convertem e reutilize em qualquer campanha. Com IA para gerar novos em segundos.",
-  },
+const quickLinks = [
+  { to: "/leads", icon: Users, label: "Leads" },
+  { to: "/emails", icon: Mail, label: "Campanhas" },
+  { to: "/respostas", icon: MessageCircle, label: "Respostas" },
+  { to: "/kanban", icon: Columns3, label: "Pipeline" },
+  { to: "/templates", icon: FileText, label: "Templates" },
 ];
 
 export default function Dashboard() {
