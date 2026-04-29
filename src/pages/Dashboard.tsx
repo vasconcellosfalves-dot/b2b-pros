@@ -8,7 +8,7 @@ import {
   MessageCircle,
   Columns3,
   Clock,
-  FileStar,
+  FileText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -58,7 +58,7 @@ const menuItems = [
   },
   {
     to: "/templates",
-    icon: FileStar,
+    icon: FileText,
     title: "Seus melhores e-mails sempre prontos",
     desc: "Salve os e-mails que mais convertem e reutilize em qualquer campanha. Com IA para gerar novos em segundos.",
   },
