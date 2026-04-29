@@ -47,6 +47,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        status: {
+          novo: "hsl(var(--status-novo))",
+          "em-contato": "hsl(var(--status-em-contato))",
+          respondeu: "hsl(var(--status-respondeu))",
+          descartado: "hsl(var(--status-descartado))",
+          convertido: "hsl(var(--status-convertido))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
