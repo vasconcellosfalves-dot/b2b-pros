@@ -227,9 +227,9 @@ export function ImpactWizard({ open, onOpenChange }: Props) {
 
   const renderTpl = (tpl: string, lead?: BaseLead) =>
     tpl
-      .replaceAll("{{nome}}", lead?.nome ?? "[nome]")
-      .replaceAll("{{empresa}}", lead?.empresa ?? "[empresa]")
-      .replaceAll("{{cargo}}", lead?.cargo ?? "[cargo]");
+      .replace(/\{\{nome\}\}/g, lead?.nome ?? "[nome]")
+      .replace(/\{\{empresa\}\}/g, lead?.empresa ?? "[empresa]")
+      .replace(/\{\{cargo\}\}/g, lead?.cargo ?? "[cargo]");
 
   const canStep2 = selectedIds.size > 0;
   const canStep3 = nomeCampanha.trim() && assunto.trim() && corpo.trim();
