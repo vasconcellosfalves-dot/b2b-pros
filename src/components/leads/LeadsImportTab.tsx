@@ -15,9 +15,10 @@ type Mode = null | "apollo" | "csv" | "manual";
 interface Props {
   onImported: () => void;
   onCreated?: (leadId: string) => void;
+  onGoBaseApollo?: () => void;
 }
 
-export function LeadsImportTab({ onImported, onCreated }: Props) {
+export function LeadsImportTab({ onImported, onCreated, onGoBaseApollo }: Props) {
   const [mode, setMode] = useState<Mode>(null);
 
   if (mode === null) {
@@ -54,7 +55,7 @@ export function LeadsImportTab({ onImported, onCreated }: Props) {
         <ArrowLeft className="h-4 w-4" /> Voltar para opções
       </Button>
 
-      {mode === "apollo" && <ApolloSearch onImported={onImported} />}
+      {mode === "apollo" && <ApolloSearch onImported={onImported} onGoBaseFiltered={onGoBaseApollo} />}
       {mode === "csv" && <CsvComingSoon />}
       {mode === "manual" && (
         <ManualForm

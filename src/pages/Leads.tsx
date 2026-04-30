@@ -104,6 +104,7 @@ export default function Leads() {
           <LeadsImportTab
             onImported={() => setReloadKey((k) => k + 1)}
             onCreated={handleCreatedManual}
+            onGoBaseApollo={() => { setReloadKey((k) => k + 1); setTab("base"); }}
           />
         </TabsContent>
       </Tabs>

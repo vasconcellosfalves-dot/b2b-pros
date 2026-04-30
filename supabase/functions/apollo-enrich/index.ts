@@ -7,15 +7,17 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-interface SearchBody {
-  person_titles?: string[];
-  person_seniorities?: string[];
-  q_organization_keyword_tags?: string[];
-  organization_industries?: string[];
-  person_locations?: string[];
-  organization_num_employees_ranges?: string[];
-  page?: number;
-  per_page?: number;
+interface EnrichBody {
+  apollo_id?: string;
+  first_name?: string;
+  last_name?: string;
+  name?: string;
+  organization_name?: string;
+  domain?: string;
+  email?: string;
+  linkedin_url?: string;
+  reveal_personal_emails?: boolean;
+  reveal_phone_number?: boolean;
 }
 
 Deno.serve(async (req) => {
@@ -57,28 +59,27 @@ Deno.serve(async (req) => {
     const apolloKey = cfg?.apollo_key?.trim();
     if (!apolloKey) {
       return new Response(
-        JSON.stringify({ error: "Chave Apollo.io não configurada. Adicione em Configurações." }),
+        JSON.stringify({ error: "Chave Apollo.io não configurada." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    const body: SearchBody = await req.json().catch(() => ({}));
+    const body: EnrichBody = await req.json().catch(() => ({}));
 
     const payload: Record<string, unknown> = {
-      page: body.page ?? 1,
-      per_page: Math.min(body.per_page ?? 25, 100),
+      reveal_personal_emails: !!body.reveal_personal_emails,
+      reveal_phone_number: !!body.reveal_phone_number,
     };
-    if (body.person_titles?.length) payload.person_titles = body.person_titles;
-    if (body.person_seniorities?.length) payload.person_seniorities = body.person_seniorities;
-    if (body.q_organization_keyword_tags?.length)
-      payload.q_organization_keyword_tags = body.q_organization_keyword_tags;
-    if (body.organization_industries?.length)
-      payload.organization_industries = body.organization_industries;
-    if (body.person_locations?.length) payload.person_locations = body.person_locations;
-    if (body.organization_num_employees_ranges?.length)
-      payload.organization_num_employees_ranges = body.organization_num_employees_ranges;
+    if (body.apollo_id) payload.id = body.apollo_id;
+    if (body.first_name) payload.first_name = body.first_name;
+    if (body.last_name) payload.last_name = body.last_name;
+    if (body.name) payload.name = body.name;
+    if (body.organization_name) payload.organization_name = body.organization_name;
+    if (body.domain) payload.domain = body.domain;
+    if (body.email) payload.email = body.email;
+    if (body.linkedin_url) payload.linkedin_url = body.linkedin_url;
 
-    const apolloRes = await fetch("https://api.apollo.io/api/v1/mixed_people/search", {
+    const apolloRes = await fetch("https://api.apollo.io/api/v1/people/match", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -91,11 +92,7 @@ Deno.serve(async (req) => {
 
     const text = await apolloRes.text();
     let json: any;
-    try {
-      json = JSON.parse(text);
-    } catch {
-      json = { raw: text };
-    }
+    try { json = JSON.parse(text); } catch { json = { raw: text }; }
 
     if (!apolloRes.ok) {
       return new Response(
@@ -106,7 +103,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    const people = (json.people ?? json.contacts ?? []).map((p: any) => ({
+    const p = json.person ?? json.matches?.[0] ?? null;
+    const person = p ? {
       id: p.id,
       nome: [p.first_name, p.last_name].filter(Boolean).join(" ") || p.name || "",
       cargo: p.title ?? null,
@@ -118,19 +116,14 @@ Deno.serve(async (req) => {
       telefone: p.phone_numbers?.[0]?.sanitized_number ?? null,
       linkedin_url: p.linkedin_url ?? null,
       photo_url: p.photo_url ?? null,
-    }));
+    } : null;
 
     return new Response(
-      JSON.stringify({
-        people,
-        total: json.pagination?.total_entries ?? people.length,
-        page: json.pagination?.page ?? payload.page,
-        per_page: json.pagination?.per_page ?? payload.per_page,
-      }),
+      JSON.stringify({ person }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
-    console.error("apollo-search error", err);
+    console.error("apollo-enrich error", err);
     return new Response(JSON.stringify({ error: String(err?.message ?? err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
