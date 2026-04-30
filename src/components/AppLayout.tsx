@@ -147,8 +147,8 @@ export default function AppLayout() {
                 <item.icon className="h-5 w-5" />
                 <span className="truncate max-w-full px-1">{item.label}</span>
                 {item.badge === "respostas" && unread > 0 && (
-                  <span className="absolute top-1 right-3 rounded-full bg-status-respondeu px-1 text-[9px] font-bold text-background">
-                    {unread}
+                  <span className="absolute top-1 right-2 inline-flex items-center justify-center min-w-[16px] h-4 rounded-full bg-[#EF4444] px-1 text-[11px] font-bold text-white leading-none">
+                    {unread > 99 ? "99+" : unread}
                   </span>
                 )}
               </NavLink>
