@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Rocket, Users, Mail, MessageCircle, Columns3, FileText } from "lucide-react";
+import { Rocket, Users, Mail, MessageCircle, Columns3, FileText, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ImpactWizard } from "@/components/ImpactWizard";
+import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 
 interface Kpis {
   totalLeads: number;
