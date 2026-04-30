@@ -6,30 +6,28 @@ interface LogoProps {
 }
 
 export function B2BLogo({ size = "md", showTagline = false }: LogoProps) {
+  // Texto B2B PROS em sans-serif bold (logo antigo)
   const text =
-    size === "sm" ? "text-xl" : size === "lg" ? "text-4xl" : "text-2xl";
-  const byText =
-    size === "sm" ? "text-[9px]" : size === "lg" ? "text-[11px]" : "text-[10px]";
-  const lineaH = size === "sm" ? "h-3" : size === "lg" ? "h-5" : "h-4";
+    size === "sm" ? "text-lg" : size === "lg" ? "text-3xl" : "text-xl";
+
+  // Logo Linea AUMENTADO em pelo menos 100% vs versão anterior
+  // antes: sm=h-3, md=h-4, lg=h-5  →  agora: sm=h-7, md=h-9, lg=h-12
+  const lineaH =
+    size === "sm" ? "h-7" : size === "lg" ? "h-12" : "h-9";
 
   return (
     <div className="flex flex-col leading-none">
       <span
-        className={`${text} font-serif font-light tracking-[0.18em] text-foreground`}
+        className={`${text} font-sans font-bold tracking-tight text-foreground`}
       >
-        B2B&nbsp;PROS
+        B2B PROS
       </span>
       {showTagline && (
-        <div className="flex items-center gap-1.5 mt-1.5 pl-[2px]">
-          <span
-            className={`${byText} font-serif italic tracking-wider text-muted-foreground`}
-          >
-            by
-          </span>
+        <div className="mt-2 pl-[1px]">
           <img
             src={lineaLogo}
             alt="Linea Consulting"
-            className={`${lineaH} w-auto opacity-90`}
+            className={`${lineaH} w-auto opacity-95`}
           />
         </div>
       )}

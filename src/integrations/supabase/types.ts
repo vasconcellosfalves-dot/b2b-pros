@@ -98,31 +98,46 @@ export type Database = {
         Row: {
           agendado_para: string | null
           assunto: string
+          briefing_cta: string | null
+          briefing_dor: string | null
+          briefing_persona: string | null
           corpo: string
           criado_em: string
           id: string
+          idioma: string | null
           nome: string
           status: Database["public"]["Enums"]["campanha_status"]
+          tom_voz: string | null
           user_id: string
         }
         Insert: {
           agendado_para?: string | null
           assunto?: string
+          briefing_cta?: string | null
+          briefing_dor?: string | null
+          briefing_persona?: string | null
           corpo?: string
           criado_em?: string
           id?: string
+          idioma?: string | null
           nome: string
           status?: Database["public"]["Enums"]["campanha_status"]
+          tom_voz?: string | null
           user_id: string
         }
         Update: {
           agendado_para?: string | null
           assunto?: string
+          briefing_cta?: string | null
+          briefing_dor?: string | null
+          briefing_persona?: string | null
           corpo?: string
           criado_em?: string
           id?: string
+          idioma?: string | null
           nome?: string
           status?: Database["public"]["Enums"]["campanha_status"]
+          tom_voz?: string | null
           user_id?: string
         }
         Relationships: []
@@ -131,28 +146,43 @@ export type Database = {
         Row: {
           apollo_key: string | null
           atualizado_em: string
+          cliente_ideal_padrao: string | null
+          dores_resolvidas: string | null
+          empresa_descricao: string | null
           id: string
+          idioma_padrao: string | null
           remetente_email: string | null
           remetente_nome: string | null
           sendgrid_key: string | null
+          tom_voz_padrao: string | null
           user_id: string
         }
         Insert: {
           apollo_key?: string | null
           atualizado_em?: string
+          cliente_ideal_padrao?: string | null
+          dores_resolvidas?: string | null
+          empresa_descricao?: string | null
           id?: string
+          idioma_padrao?: string | null
           remetente_email?: string | null
           remetente_nome?: string | null
           sendgrid_key?: string | null
+          tom_voz_padrao?: string | null
           user_id: string
         }
         Update: {
           apollo_key?: string | null
           atualizado_em?: string
+          cliente_ideal_padrao?: string | null
+          dores_resolvidas?: string | null
+          empresa_descricao?: string | null
           id?: string
+          idioma_padrao?: string | null
           remetente_email?: string | null
           remetente_nome?: string | null
           sendgrid_key?: string | null
+          tom_voz_padrao?: string | null
           user_id?: string
         }
         Relationships: []
@@ -459,6 +489,72 @@ export type Database = {
           criado_em?: string
           id?: string
           nome?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      templates_campanha: {
+        Row: {
+          atualizado_em: string
+          briefing_cta: string | null
+          briefing_dor: string | null
+          briefing_persona: string | null
+          criado_em: string
+          email_1_assunto: string | null
+          email_1_corpo: string | null
+          email_1_delay: number | null
+          email_2_assunto: string | null
+          email_2_corpo: string | null
+          email_2_delay: number | null
+          email_3_assunto: string | null
+          email_3_corpo: string | null
+          email_3_delay: number | null
+          id: string
+          idioma: string | null
+          nome: string
+          tom_voz: string | null
+          user_id: string
+        }
+        Insert: {
+          atualizado_em?: string
+          briefing_cta?: string | null
+          briefing_dor?: string | null
+          briefing_persona?: string | null
+          criado_em?: string
+          email_1_assunto?: string | null
+          email_1_corpo?: string | null
+          email_1_delay?: number | null
+          email_2_assunto?: string | null
+          email_2_corpo?: string | null
+          email_2_delay?: number | null
+          email_3_assunto?: string | null
+          email_3_corpo?: string | null
+          email_3_delay?: number | null
+          id?: string
+          idioma?: string | null
+          nome: string
+          tom_voz?: string | null
+          user_id: string
+        }
+        Update: {
+          atualizado_em?: string
+          briefing_cta?: string | null
+          briefing_dor?: string | null
+          briefing_persona?: string | null
+          criado_em?: string
+          email_1_assunto?: string | null
+          email_1_corpo?: string | null
+          email_1_delay?: number | null
+          email_2_assunto?: string | null
+          email_2_corpo?: string | null
+          email_2_delay?: number | null
+          email_3_assunto?: string | null
+          email_3_corpo?: string | null
+          email_3_delay?: number | null
+          id?: string
+          idioma?: string | null
+          nome?: string
+          tom_voz?: string | null
           user_id?: string
         }
         Relationships: []
