@@ -31,7 +31,6 @@ const navItems = [
   { to: "/kanban", label: "Kanban", icon: Kanban },
   { to: "/emails", label: "Campanhas", icon: Mail },
   { to: "/respostas", label: "Respostas", icon: MessageSquare, badge: "respostas" as const },
-  { to: "/templates", label: "Templates", icon: FileText },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 
