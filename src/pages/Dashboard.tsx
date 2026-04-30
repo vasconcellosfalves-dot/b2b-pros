@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Rocket, Users, Mail, MessageCircle, Columns3, FileText } from "lucide-react";
+import { Rocket, Users, Mail, MessageCircle, Columns3, FileText, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ImpactWizard } from "@/components/ImpactWizard";
+import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 
 interface Kpis {
   totalLeads: number;
@@ -98,6 +99,8 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+      <OnboardingChecklist onImpactarClick={() => setWizardOpen(true)} />
+
       {/* HERO */}
       <section className="text-center space-y-4 pt-2 md:pt-6">
         <h1 className="text-2xl md:text-4xl font-bold leading-tight">
@@ -129,7 +132,9 @@ export default function Dashboard() {
           {kpiCards.map((c) => (
             <Card key={c.label} className="p-4 bg-card border-border">
               <p className="text-xs text-muted-foreground">{c.label}</p>
-              <p className="text-2xl md:text-3xl font-bold mt-1">{c.value}</p>
+              <p className="text-2xl md:text-3xl font-bold mt-1">
+                {kpis.totalLeads === 0 ? "—" : c.value}
+              </p>
             </Card>
           ))}
         </div>
@@ -139,47 +144,65 @@ export default function Dashboard() {
       <section>
         <h2 className="text-lg font-semibold mb-4">Funil de conversão</h2>
         <Card className="p-4 md:p-6 bg-card border-border">
-          <div className="space-y-3 md:hidden">
-            {funnel.map((f, i) => {
-              const prev = i === 0 ? f.value : funnel[i - 1].value;
-              const pct = prev > 0 && i > 0 ? Math.round((f.value / prev) * 100) : null;
-              return (
-                <div key={f.label} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-medium">{f.label}</span>
-                    <span className="text-muted-foreground">
-                      {f.value}{pct !== null ? ` · ${pct}%` : ""}
-                    </span>
-                  </div>
-                  <div className="h-3 rounded-full bg-secondary overflow-hidden">
-                    <div className={`h-full ${f.color} transition-all`} style={{ width: `${(f.value / funnelMax) * 100}%` }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="hidden md:flex items-end justify-between gap-2">
-            {funnel.map((f, i) => {
-              const prev = i === 0 ? f.value : funnel[i - 1].value;
-              const pct = prev > 0 && i > 0 ? Math.round((f.value / prev) * 100) : null;
-              const heightPct = (f.value / funnelMax) * 100;
-              return (
-                <div key={f.label} className="flex-1 flex flex-col items-center gap-2">
-                  <p className="text-2xl font-bold">{f.value}</p>
-                  <div className="w-full h-32 flex items-end">
-                    <div
-                      className={`w-full ${f.color} rounded-t-lg transition-all`}
-                      style={{ height: `${Math.max(heightPct, 8)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs font-medium text-center">{f.label}</p>
-                  {pct !== null && (
-                    <p className="text-[10px] text-muted-foreground">{pct}% da etapa anterior</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          {kpis.totalLeads < 5 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center space-y-3">
+              <BarChart3 className="h-12 w-12 text-muted-foreground" style={{ opacity: 0.3 }} />
+              <p className="text-sm font-medium">Seu funil de conversão aparecerá aqui</p>
+              <p className="text-xs text-muted-foreground max-w-sm">
+                Importe seus primeiros leads para começar a acompanhar a jornada de conversão
+              </p>
+              <button
+                onClick={() => navigate("/leads")}
+                className="text-xs text-primary hover:underline mt-1"
+              >
+                Importar leads →
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-3 md:hidden">
+                {funnel.map((f, i) => {
+                  const prev = i === 0 ? f.value : funnel[i - 1].value;
+                  const pct = prev > 0 && i > 0 ? Math.round((f.value / prev) * 100) : null;
+                  return (
+                    <div key={f.label} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="font-medium">{f.label}</span>
+                        <span className="text-muted-foreground">
+                          {f.value}{pct !== null ? ` · ${pct}%` : ""}
+                        </span>
+                      </div>
+                      <div className="h-3 rounded-full bg-secondary overflow-hidden">
+                        <div className={`h-full ${f.color} transition-all`} style={{ width: `${(f.value / funnelMax) * 100}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="hidden md:flex items-end justify-between gap-2">
+                {funnel.map((f, i) => {
+                  const prev = i === 0 ? f.value : funnel[i - 1].value;
+                  const pct = prev > 0 && i > 0 ? Math.round((f.value / prev) * 100) : null;
+                  const heightPct = (f.value / funnelMax) * 100;
+                  return (
+                    <div key={f.label} className="flex-1 flex flex-col items-center gap-2">
+                      <p className="text-2xl font-bold">{f.value}</p>
+                      <div className="w-full h-32 flex items-end">
+                        <div
+                          className={`w-full ${f.color} rounded-t-lg transition-all`}
+                          style={{ height: `${Math.max(heightPct, 8)}%` }}
+                        />
+                      </div>
+                      <p className="text-xs font-medium text-center">{f.label}</p>
+                      {pct !== null && (
+                        <p className="text-[10px] text-muted-foreground">{pct}% da etapa anterior</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </Card>
       </section>
 
