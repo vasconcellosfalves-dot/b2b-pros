@@ -45,11 +45,29 @@ export default function AppLayout() {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("respostas")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "nova")
-      .then(({ count }) => setUnread(count ?? 0));
+
+    const refresh = () => {
+      supabase
+        .from("respostas")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "nova")
+        .then(({ count }) => setUnread(count ?? 0));
+    };
+
+    refresh();
+
+    const channel = supabase
+      .channel("respostas-unread")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "respostas" },
+        () => refresh(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const handleSignOut = async () => {
