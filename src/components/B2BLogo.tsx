@@ -1,4 +1,3 @@
-import { Briefcase } from "lucide-react";
 import lineaLogo from "@/assets/linea-logo.png";
 
 interface LogoProps {
@@ -7,29 +6,33 @@ interface LogoProps {
 }
 
 export function B2BLogo({ size = "md", showTagline = false }: LogoProps) {
-  const dims = size === "sm" ? "h-8 w-8" : size === "lg" ? "h-14 w-14" : "h-10 w-10";
-  const text = size === "sm" ? "text-base" : size === "lg" ? "text-3xl" : "text-xl";
-  const lineaH = size === "sm" ? "h-4" : size === "lg" ? "h-6" : "h-5";
+  const text =
+    size === "sm" ? "text-xl" : size === "lg" ? "text-4xl" : "text-2xl";
+  const byText =
+    size === "sm" ? "text-[9px]" : size === "lg" ? "text-[11px]" : "text-[10px]";
+  const lineaH = size === "sm" ? "h-3" : size === "lg" ? "h-5" : "h-4";
+
   return (
-    <div className="flex items-center gap-3">
-      <div
-        className={`${dims} flex items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-glow shadow-[var(--shadow-elegant)]`}
+    <div className="flex flex-col leading-none">
+      <span
+        className={`${text} font-serif font-light tracking-[0.18em] text-foreground`}
       >
-        <Briefcase className="h-1/2 w-1/2 text-primary-foreground" strokeWidth={2.5} />
-      </div>
-      <div className="flex flex-col leading-tight">
-        <span className={`${text} font-bold tracking-tight text-foreground`}>
-          B2B <span className="text-primary">PROS</span>
-        </span>
-        {showTagline && (
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              um produto
-            </span>
-            <img src={lineaLogo} alt="Linea Consulting" className={`${lineaH} w-auto opacity-90`} />
-          </div>
-        )}
-      </div>
+        B2B&nbsp;PROS
+      </span>
+      {showTagline && (
+        <div className="flex items-center gap-1.5 mt-1.5 pl-[2px]">
+          <span
+            className={`${byText} font-serif italic tracking-wider text-muted-foreground`}
+          >
+            by
+          </span>
+          <img
+            src={lineaLogo}
+            alt="Linea Consulting"
+            className={`${lineaH} w-auto opacity-90`}
+          />
+        </div>
+      )}
     </div>
   );
 }
