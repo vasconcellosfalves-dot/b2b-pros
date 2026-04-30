@@ -118,12 +118,29 @@ export default function AppLayout() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Desktop top bar with logged user */}
+        <header className="hidden md:flex items-center justify-end border-b border-border bg-card/40 px-6 py-2.5">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-background/60 px-3 py-1.5">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <UserIcon className="h-3.5 w-3.5" />
+            </div>
+            <span className="text-xs font-medium text-foreground max-w-[220px] truncate">
+              {user?.email ?? "Usuário"}
+            </span>
+          </div>
+        </header>
+
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between border-b border-border bg-card/50 px-4 py-3">
           <B2BLogo size="sm" />
-          <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
-            <LogOut className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-muted-foreground max-w-[140px] truncate">
+              {user?.email}
+            </span>
+            <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sair">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
