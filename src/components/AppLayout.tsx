@@ -100,8 +100,8 @@ export default function AppLayout() {
               <item.icon className="h-4 w-4" />
               <span className="flex-1">{item.label}</span>
               {item.badge === "respostas" && unread > 0 && (
-                <span className="rounded-full bg-status-respondeu px-1.5 py-0.5 text-[10px] font-bold text-background">
-                  {unread}
+                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-[#EF4444] px-1 text-[11px] font-bold text-white">
+                  {unread > 99 ? "99+" : unread}
                 </span>
               )}
             </NavLink>
