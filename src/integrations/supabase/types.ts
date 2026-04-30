@@ -266,44 +266,68 @@ export type Database = {
       leads: {
         Row: {
           abordagem_sugerida: string | null
+          apollo_id: string | null
           atualizado_em: string
           cargo: string | null
+          cidade: string | null
           criado_em: string
           email: string | null
+          email_status: string | null
           empresa: string | null
+          fonte: string | null
           id: string
+          linkedin_url: string | null
           nome: string
           score: number | null
+          senioridade: string | null
+          setor: string | null
           status: Database["public"]["Enums"]["lead_status"]
           telefone: string | null
+          ultima_atividade: string | null
           user_id: string
         }
         Insert: {
           abordagem_sugerida?: string | null
+          apollo_id?: string | null
           atualizado_em?: string
           cargo?: string | null
+          cidade?: string | null
           criado_em?: string
           email?: string | null
+          email_status?: string | null
           empresa?: string | null
+          fonte?: string | null
           id?: string
+          linkedin_url?: string | null
           nome: string
           score?: number | null
+          senioridade?: string | null
+          setor?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           telefone?: string | null
+          ultima_atividade?: string | null
           user_id: string
         }
         Update: {
           abordagem_sugerida?: string | null
+          apollo_id?: string | null
           atualizado_em?: string
           cargo?: string | null
+          cidade?: string | null
           criado_em?: string
           email?: string | null
+          email_status?: string | null
           empresa?: string | null
+          fonte?: string | null
           id?: string
+          linkedin_url?: string | null
           nome?: string
           score?: number | null
+          senioridade?: string | null
+          setor?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           telefone?: string | null
+          ultima_atividade?: string | null
           user_id?: string
         }
         Relationships: []
