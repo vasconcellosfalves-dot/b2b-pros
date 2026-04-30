@@ -55,7 +55,7 @@ export function LeadsImportTab({ onImported, onCreated, onGoBaseApollo }: Props)
         <ArrowLeft className="h-4 w-4" /> Voltar para opções
       </Button>
 
-      {mode === "apollo" && <ApolloSearch onImported={onImported} />}
+      {mode === "apollo" && <ApolloSearch onImported={onImported} onGoBaseFiltered={onGoBaseApollo} />}
       {mode === "csv" && <CsvComingSoon />}
       {mode === "manual" && (
         <ManualForm
