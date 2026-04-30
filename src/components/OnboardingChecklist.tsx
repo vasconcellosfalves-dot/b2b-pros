@@ -41,7 +41,7 @@ export function OnboardingChecklist({ onImpactarClick }: Props) {
         supabase.from("configuracoes").select("apollo_key, sendgrid_key").eq("user_id", user.id).maybeSingle(),
         supabase.from("leads").select("*", { count: "exact", head: true }),
         supabase.from("templates").select("*", { count: "exact", head: true }),
-        supabase.from("campanhas").select("*", { count: "exact", head: true }).eq("status", "enviada" as any),
+        supabase.from("campanhas").select("*", { count: "exact", head: true }).eq("status", "enviado"),
       ]);
 
       setState({
