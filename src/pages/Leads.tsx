@@ -100,9 +100,8 @@ export default function Leads() {
           />
         </TabsContent>
 
-        <TabsContent value="import" className="mt-5" forceMount hidden={tab !== "import"}>
+        <TabsContent value="import" className="mt-5">
           <LeadsImportTab
-            key={`import-${tab === "import" ? reloadKey : "idle"}`}
             onImported={() => setReloadKey((k) => k + 1)}
             onCreated={handleCreatedManual}
             onGoBaseApollo={() => { setReloadKey((k) => k + 1); setTab("base"); }}
