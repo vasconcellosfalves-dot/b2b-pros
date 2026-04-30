@@ -132,7 +132,7 @@ export default function AppLayout() {
 
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between border-b border-border bg-card/50 px-4 py-3">
-          <B2BLogo size="sm" />
+          <B2BLogo size="sm" showTagline />
           <div className="flex items-center gap-2">
             <span className="text-[11px] text-muted-foreground max-w-[140px] truncate">
               {user?.email}
