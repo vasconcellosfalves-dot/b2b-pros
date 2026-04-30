@@ -9,7 +9,9 @@ const corsHeaders = {
 
 interface SearchBody {
   person_titles?: string[];
-  organization_industry_tag_ids?: string[];
+  person_seniorities?: string[];
+  q_organization_keyword_tags?: string[];
+  organization_industries?: string[];
   person_locations?: string[];
   organization_num_employees_ranges?: string[];
   page?: number;
@@ -67,8 +69,11 @@ Deno.serve(async (req) => {
       per_page: Math.min(body.per_page ?? 25, 100),
     };
     if (body.person_titles?.length) payload.person_titles = body.person_titles;
-    if (body.organization_industry_tag_ids?.length)
-      payload.organization_industry_tag_ids = body.organization_industry_tag_ids;
+    if (body.person_seniorities?.length) payload.person_seniorities = body.person_seniorities;
+    if (body.q_organization_keyword_tags?.length)
+      payload.q_organization_keyword_tags = body.q_organization_keyword_tags;
+    if (body.organization_industries?.length)
+      payload.organization_industries = body.organization_industries;
     if (body.person_locations?.length) payload.person_locations = body.person_locations;
     if (body.organization_num_employees_ranges?.length)
       payload.organization_num_employees_ranges = body.organization_num_employees_ranges;
@@ -106,6 +111,9 @@ Deno.serve(async (req) => {
       nome: [p.first_name, p.last_name].filter(Boolean).join(" ") || p.name || "",
       cargo: p.title ?? null,
       empresa: p.organization?.name ?? p.account?.name ?? null,
+      setor: p.organization?.industry ?? null,
+      cidade: [p.city, p.country].filter(Boolean).join(", ") || null,
+      senioridade: p.seniority ?? null,
       email: p.email && p.email !== "email_not_unlocked@domain.com" ? p.email : null,
       telefone: p.phone_numbers?.[0]?.sanitized_number ?? null,
       linkedin_url: p.linkedin_url ?? null,
@@ -113,7 +121,12 @@ Deno.serve(async (req) => {
     }));
 
     return new Response(
-      JSON.stringify({ people, total: json.pagination?.total_entries ?? people.length }),
+      JSON.stringify({
+        people,
+        total: json.pagination?.total_entries ?? people.length,
+        page: json.pagination?.page ?? payload.page,
+        per_page: json.pagination?.per_page ?? payload.per_page,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
