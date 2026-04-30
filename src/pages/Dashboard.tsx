@@ -99,6 +99,8 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+      <OnboardingChecklist onImpactarClick={() => setWizardOpen(true)} />
+
       {/* HERO */}
       <section className="text-center space-y-4 pt-2 md:pt-6">
         <h1 className="text-2xl md:text-4xl font-bold leading-tight">
