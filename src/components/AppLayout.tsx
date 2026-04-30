@@ -10,6 +10,7 @@ import {
   MessageSquare,
   FileText,
   MoreHorizontal,
+  User as UserIcon,
 } from "lucide-react";
 import { B2BLogo } from "./B2BLogo";
 import { Button } from "@/components/ui/button";
