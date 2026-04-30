@@ -15,9 +15,10 @@ type Mode = null | "apollo" | "csv" | "manual";
 interface Props {
   onImported: () => void;
   onCreated?: (leadId: string) => void;
+  onGoBaseApollo?: () => void;
 }
 
-export function LeadsImportTab({ onImported, onCreated }: Props) {
+export function LeadsImportTab({ onImported, onCreated, onGoBaseApollo }: Props) {
   const [mode, setMode] = useState<Mode>(null);
 
   if (mode === null) {
