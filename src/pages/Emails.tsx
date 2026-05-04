@@ -424,6 +424,13 @@ export default function Emails() {
         </TabsContent>
       </Tabs>
 
+      <CampanhaWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onCreated={load}
+        templateSeed={seed}
+      />
+
       <CampaignDetailDialog
         campanha={detail}
         onClose={() => setDetail(null)}
