@@ -400,15 +400,12 @@ export default function Emails() {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 pt-1">
-                      <Button
-                        size="sm"
-                        onClick={() => toast.info("Wizard de nova campanha chega no próximo bloco")}
-                      >
+                      <Button size="sm" onClick={() => openFromTemplate(t)}>
                         Usar este template
                       </Button>
                       <Button
                         size="sm" variant="outline"
-                        onClick={() => toast.info("Edição de templates chega no próximo bloco")}
+                        onClick={() => toast.info("Edição direta de templates em breve — use 'Usar template' e depois 'Salvar como template'.")}
                       >
                         <Pencil className="h-3.5 w-3.5" /> Editar
                       </Button>
