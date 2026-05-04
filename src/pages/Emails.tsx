@@ -15,15 +15,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Plus, Mail, Trash2, Calendar as CalendarIcon, Send, BarChart3, Sparkles,
+  Plus, Mail, Trash2, Send, BarChart3,
   MoreHorizontal, FileText, Copy, Pause, Pencil, BookmarkPlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { STATUS_OPTIONS, LeadStatus } from "@/components/StatusBadge";
 import { toast } from "sonner";
+import CampanhaWizard, { TemplateSeed } from "@/components/campanhas/CampanhaWizard";
 
 interface Campanha {
   id: string;
