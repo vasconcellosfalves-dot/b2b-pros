@@ -101,19 +101,9 @@ export default function Emails() {
   const [campanhas, setCampanhas] = useState<Campanha[]>([]);
   const [templates, setTemplates] = useState<TemplateCampanha[]>([]);
   const [tab, setTab] = useState<"andamento" | "rascunho" | "concluida" | "templates">("andamento");
-  const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [seed, setSeed] = useState<TemplateSeed | null>(null);
   const [detail, setDetail] = useState<Campanha | null>(null);
-
-  const [form, setForm] = useState({
-    nome: "",
-    leadStatus: "novo" as LeadStatus,
-    agendar: false,
-    agendadoPara: "",
-  });
-  const [steps, setSteps] = useState<Step[]>([
-    { step_numero: 1, assunto: "", corpo: "", delay_dias: 0 },
-  ]);
 
   const load = async () => {
     const { data: camps, error } = await supabase
@@ -122,7 +112,6 @@ export default function Emails() {
       .order("criado_em", { ascending: false });
     if (error) return toast.error(error.message);
 
-    // métricas por campanha (enviados / abertos / respostas) — uma única query
     const ids = (camps ?? []).map((c: any) => c.id);
     let respByCamp: Record<string, number> = {};
     if (ids.length) {
@@ -152,9 +141,9 @@ export default function Emails() {
 
     const { data: tps } = await supabase
       .from("templates_campanha")
-      .select("id, nome, tom_voz, email_1_delay, email_2_delay, email_3_delay, criado_em")
+      .select("*")
       .order("criado_em", { ascending: false });
-    setTemplates((tps ?? []) as TemplateCampanha[]);
+    setTemplates((tps ?? []) as any);
   };
 
   useEffect(() => {
@@ -174,10 +163,24 @@ export default function Emails() {
     templates: templates.length,
   };
 
-  const resetForm = () => {
-    setForm({ nome: "", leadStatus: "novo", agendar: false, agendadoPara: "" });
-    setSteps([{ step_numero: 1, assunto: "", corpo: "", delay_dias: 0 }]);
+  const openNew = () => { setSeed(null); setWizardOpen(true); };
+  const openFromTemplate = (t: any) => {
+    setSeed({
+      nome: t.nome,
+      briefing_persona: t.briefing_persona,
+      briefing_dor: t.briefing_dor,
+      briefing_cta: t.briefing_cta,
+      tom_voz: t.tom_voz,
+      idioma: t.idioma,
+      steps: [
+        { assunto: t.email_1_assunto ?? "", corpo: t.email_1_corpo ?? "", delay_dias: t.email_1_delay ?? 0 },
+        { assunto: t.email_2_assunto ?? "", corpo: t.email_2_corpo ?? "", delay_dias: t.email_2_delay ?? 3 },
+        { assunto: t.email_3_assunto ?? "", corpo: t.email_3_corpo ?? "", delay_dias: t.email_3_delay ?? 7 },
+      ].filter((s) => s.assunto || s.corpo),
+    });
+    setWizardOpen(true);
   };
+
 
   const addStep = () =>
     setSteps((s) => [...s, { step_numero: s.length + 1, assunto: "", corpo: "", delay_dias: 3 }]);
