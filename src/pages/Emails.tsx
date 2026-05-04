@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -15,15 +15,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Plus, Mail, Trash2, Calendar as CalendarIcon, Send, BarChart3, Sparkles,
+  Plus, Mail, Trash2, Send, BarChart3,
   MoreHorizontal, FileText, Copy, Pause, Pencil, BookmarkPlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { STATUS_OPTIONS, LeadStatus } from "@/components/StatusBadge";
 import { toast } from "sonner";
+import CampanhaWizard, { TemplateSeed } from "@/components/campanhas/CampanhaWizard";
 
 interface Campanha {
   id: string;
@@ -51,15 +50,8 @@ interface TemplateCampanha {
   criado_em: string;
 }
 
-interface Step {
-  id?: string;
-  step_numero: number;
-  assunto: string;
-  corpo: string;
-  delay_dias: number;
-}
 
-const VARIAVEIS = ["{{nome}}", "{{empresa}}", "{{cargo}}", "{{email}}"];
+
 
 // ---------- helpers ----------
 const tomLabel = (v: string | null) => {
@@ -102,19 +94,9 @@ export default function Emails() {
   const [campanhas, setCampanhas] = useState<Campanha[]>([]);
   const [templates, setTemplates] = useState<TemplateCampanha[]>([]);
   const [tab, setTab] = useState<"andamento" | "rascunho" | "concluida" | "templates">("andamento");
-  const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [seed, setSeed] = useState<TemplateSeed | null>(null);
   const [detail, setDetail] = useState<Campanha | null>(null);
-
-  const [form, setForm] = useState({
-    nome: "",
-    leadStatus: "novo" as LeadStatus,
-    agendar: false,
-    agendadoPara: "",
-  });
-  const [steps, setSteps] = useState<Step[]>([
-    { step_numero: 1, assunto: "", corpo: "", delay_dias: 0 },
-  ]);
 
   const load = async () => {
     const { data: camps, error } = await supabase
@@ -123,7 +105,6 @@ export default function Emails() {
       .order("criado_em", { ascending: false });
     if (error) return toast.error(error.message);
 
-    // métricas por campanha (enviados / abertos / respostas) — uma única query
     const ids = (camps ?? []).map((c: any) => c.id);
     let respByCamp: Record<string, number> = {};
     if (ids.length) {
@@ -153,9 +134,9 @@ export default function Emails() {
 
     const { data: tps } = await supabase
       .from("templates_campanha")
-      .select("id, nome, tom_voz, email_1_delay, email_2_delay, email_3_delay, criado_em")
+      .select("*")
       .order("criado_em", { ascending: false });
-    setTemplates((tps ?? []) as TemplateCampanha[]);
+    setTemplates((tps ?? []) as any);
   };
 
   useEffect(() => {
@@ -175,99 +156,24 @@ export default function Emails() {
     templates: templates.length,
   };
 
-  const resetForm = () => {
-    setForm({ nome: "", leadStatus: "novo", agendar: false, agendadoPara: "" });
-    setSteps([{ step_numero: 1, assunto: "", corpo: "", delay_dias: 0 }]);
+  const openNew = () => { setSeed(null); setWizardOpen(true); };
+  const openFromTemplate = (t: any) => {
+    setSeed({
+      nome: t.nome,
+      briefing_persona: t.briefing_persona,
+      briefing_dor: t.briefing_dor,
+      briefing_cta: t.briefing_cta,
+      tom_voz: t.tom_voz,
+      idioma: t.idioma,
+      steps: [
+        { assunto: t.email_1_assunto ?? "", corpo: t.email_1_corpo ?? "", delay_dias: t.email_1_delay ?? 0 },
+        { assunto: t.email_2_assunto ?? "", corpo: t.email_2_corpo ?? "", delay_dias: t.email_2_delay ?? 3 },
+        { assunto: t.email_3_assunto ?? "", corpo: t.email_3_corpo ?? "", delay_dias: t.email_3_delay ?? 7 },
+      ].filter((s) => s.assunto || s.corpo),
+    });
+    setWizardOpen(true);
   };
 
-  const addStep = () =>
-    setSteps((s) => [...s, { step_numero: s.length + 1, assunto: "", corpo: "", delay_dias: 3 }]);
-  const removeStep = (idx: number) =>
-    setSteps((s) => s.filter((_, i) => i !== idx).map((st, i) => ({ ...st, step_numero: i + 1 })));
-  const updateStep = (idx: number, patch: Partial<Step>) =>
-    setSteps((s) => s.map((st, i) => (i === idx ? { ...st, ...patch } : st)));
-  const insertVar = (idx: number, v: string) =>
-    updateStep(idx, { corpo: (steps[idx].corpo + " " + v).trim() });
-
-  const generateAI = async (idx: number) => {
-    const step = steps[idx];
-    if (!step.assunto && !form.nome) return toast.error("Preencha o nome ou assunto primeiro");
-    toast.loading("Gerando com IA...", { id: "ai" });
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-email", {
-        body: {
-          contexto: `${form.nome}. Step ${step.step_numero} de uma sequência. ${step.assunto || ""}`,
-          tom: idx === 0 ? "profissional cordial" : "follow-up educado",
-        },
-      });
-      if (error) throw error;
-      updateStep(idx, {
-        assunto: data?.assunto || step.assunto,
-        corpo: data?.corpo || step.corpo,
-      });
-      toast.success("Gerado!", { id: "ai" });
-    } catch (e: any) {
-      toast.error(e.message ?? "Erro ao gerar", { id: "ai" });
-    }
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    if (steps.some((s) => !s.assunto || !s.corpo)) return toast.error("Preencha todos os steps");
-    setBusy(true);
-
-    const status = form.agendar ? "agendada" : "rascunho";
-    const agendado_para = form.agendar && form.agendadoPara
-      ? new Date(form.agendadoPara).toISOString() : null;
-
-    const { data: campanha, error } = await supabase
-      .from("campanhas")
-      .insert({
-        user_id: user.id,
-        nome: form.nome,
-        assunto: steps[0].assunto,
-        corpo: steps[0].corpo,
-        status: status as any,
-        agendado_para,
-      })
-      .select()
-      .single();
-
-    if (error || !campanha) {
-      setBusy(false);
-      return toast.error(error?.message ?? "Erro ao criar campanha");
-    }
-
-    await supabase.from("email_steps").insert(
-      steps.map((s) => ({
-        campanha_id: campanha.id,
-        step_numero: s.step_numero,
-        assunto: s.assunto,
-        corpo: s.corpo,
-        delay_dias: s.delay_dias,
-      })),
-    );
-
-    const { data: leads } = await supabase
-      .from("leads").select("id").eq("status", form.leadStatus);
-
-    if (leads && leads.length > 0) {
-      await supabase.from("campanha_leads").insert(
-        leads.map((l) => ({ campanha_id: campanha.id, lead_id: l.id })),
-      );
-    }
-
-    setBusy(false);
-    toast.success(
-      form.agendar
-        ? `Campanha agendada para ${new Date(agendado_para!).toLocaleString("pt-BR")} (${leads?.length ?? 0} leads)`
-        : `Rascunho criado (${leads?.length ?? 0} leads)`,
-    );
-    resetForm();
-    setOpen(false);
-    load();
-  };
 
   // ações no menu de 3 pontinhos
   const pauseCampanha = async (c: Campanha) => {
@@ -425,132 +331,8 @@ export default function Emails() {
             {campanhas.length} campanha{campanhas.length === 1 ? "" : "s"}
           </p>
         </div>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button size="sm"><Plus className="h-4 w-4" /> Nova campanha</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Nova campanha</DialogTitle></DialogHeader>
-            <p className="text-xs text-muted-foreground -mt-2 mb-1">
-              Versão simplificada — o wizard completo de 4 passos chega no próximo bloco.
-            </p>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Nome da campanha</Label>
-                  <Input required value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Público (status do lead)</Label>
-                  <Select value={form.leadStatus} onValueChange={(v) => setForm({ ...form, leadStatus: v as LeadStatus })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {STATUS_OPTIONS.map((s) => (
-                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+        <Button size="sm" onClick={openNew}><Plus className="h-4 w-4" /> Nova campanha</Button>
 
-              <Card className="p-3 bg-secondary/30 border-border">
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4 text-primary" />
-                    <Label className="cursor-pointer" onClick={() => setForm((f) => ({ ...f, agendar: !f.agendar }))}>
-                      Agendar envio
-                    </Label>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={form.agendar}
-                    onChange={(e) => setForm({ ...form, agendar: e.target.checked })}
-                    className="h-4 w-4"
-                  />
-                </div>
-                {form.agendar && (
-                  <Input
-                    type="datetime-local"
-                    required={form.agendar}
-                    value={form.agendadoPara}
-                    onChange={(e) => setForm({ ...form, agendadoPara: e.target.value })}
-                    min={new Date().toISOString().slice(0, 16)}
-                  />
-                )}
-              </Card>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-semibold">
-                    Sequência ({steps.length} step{steps.length > 1 ? "s" : ""})
-                  </Label>
-                  <Button type="button" size="sm" variant="outline" onClick={addStep}>
-                    <Plus className="h-3.5 w-3.5" /> Adicionar step
-                  </Button>
-                </div>
-
-                {steps.map((step, idx) => (
-                  <Card key={idx} className="p-3 bg-card border-border space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
-                          Step {step.step_numero}
-                        </Badge>
-                        {idx > 0 && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <span>Aguardar</span>
-                            <Input
-                              type="number" min={1} max={90}
-                              value={step.delay_dias}
-                              onChange={(e) => updateStep(idx, { delay_dias: Number(e.target.value) })}
-                              className="h-7 w-14 text-xs"
-                            />
-                            <span>dia(s)</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex gap-1">
-                        <Button type="button" size="sm" variant="ghost" onClick={() => generateAI(idx)} title="Gerar com IA">
-                          <Sparkles className="h-3.5 w-3.5" />
-                        </Button>
-                        {steps.length > 1 && (
-                          <Button type="button" size="sm" variant="ghost" onClick={() => removeStep(idx)}>
-                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                    <Input
-                      placeholder="Assunto" required
-                      value={step.assunto}
-                      onChange={(e) => updateStep(idx, { assunto: e.target.value })}
-                    />
-                    <Textarea
-                      rows={5} placeholder="Olá {{nome}}, ..." required
-                      value={step.corpo}
-                      onChange={(e) => updateStep(idx, { corpo: e.target.value })}
-                    />
-                    <div className="flex flex-wrap gap-1">
-                      {VARIAVEIS.map((v) => (
-                        <Badge
-                          key={v} variant="outline"
-                          className="cursor-pointer hover:bg-primary/10 text-[10px]"
-                          onClick={() => insertVar(idx, v)}
-                        >
-                          {v}
-                        </Badge>
-                      ))}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
-              <Button type="submit" className="w-full" disabled={busy}>
-                {busy ? "Salvando..." : form.agendar ? "Agendar campanha" : "Salvar rascunho"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="space-y-4">
@@ -611,15 +393,12 @@ export default function Emails() {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 pt-1">
-                      <Button
-                        size="sm"
-                        onClick={() => toast.info("Wizard de nova campanha chega no próximo bloco")}
-                      >
+                      <Button size="sm" onClick={() => openFromTemplate(t)}>
                         Usar este template
                       </Button>
                       <Button
                         size="sm" variant="outline"
-                        onClick={() => toast.info("Edição de templates chega no próximo bloco")}
+                        onClick={() => toast.info("Edição direta de templates em breve — use 'Usar template' e depois 'Salvar como template'.")}
                       >
                         <Pencil className="h-3.5 w-3.5" /> Editar
                       </Button>
@@ -637,6 +416,13 @@ export default function Emails() {
           )}
         </TabsContent>
       </Tabs>
+
+      <CampanhaWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onCreated={load}
+        templateSeed={seed}
+      />
 
       <CampaignDetailDialog
         campanha={detail}
