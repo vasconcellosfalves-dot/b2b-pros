@@ -50,15 +50,8 @@ interface TemplateCampanha {
   criado_em: string;
 }
 
-interface Step {
-  id?: string;
-  step_numero: number;
-  assunto: string;
-  corpo: string;
-  delay_dias: number;
-}
 
-const VARIAVEIS = ["{{nome}}", "{{empresa}}", "{{cargo}}", "{{email}}"];
+
 
 // ---------- helpers ----------
 const tomLabel = (v: string | null) => {
